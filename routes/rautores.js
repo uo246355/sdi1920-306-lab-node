@@ -24,6 +24,45 @@ module.exports = function(app, swig) {
     });
 
 
+    app.get("/autores/filtrar/:rol", function(req, res)
+    {
+
+        let autores2 = [{"nombre" : "Janis Joplin", "rol" : "cantante", "grupo" : "Solista"},
+            {"nombre" : "Kurt Cobain", "rol" : "cantante", "grupo" : "Nirvana"},
+            {"nombre" : "Jim Morrison", "rol" : "cantante", "grupo" : "The Doors"}];
+
+        let autores = [];
+
+        for(var i=0;i<autores2.length;i++)
+        {
+            if(autores2.rol == req.rol)
+            {
+                autores[i] = autores2[i];
+            }
+        }
+
+        //let roles = ["guitarrista","batería","cantante","bajista","teclista"];
+
+        let respuesta = swig.renderFile('views/filtrar.html', {
+
+            autores : autores
+        });
+        res.send(respuesta);
+    });
+
+
+    app.get("/autores", function(req, res) {
+        let autores = [{"nombre" : "Janis Joplin", "rol" : "cantante", "grupo" : "Solista"},
+            {"nombre" : "Kurt Cobain", "rol" : "cantante", "grupo" : "Nirvana"},
+            {"nombre" : "Jim Morrison", "rol" : "cantante", "grupo" : "The Doors"}];
+
+        let respuesta = swig.renderFile('views/autores.html', {
+            autores : autores
+        });
+
+        res.send(respuesta);
+    });
+
     app.post("/autores", function(req,res){
 
 
