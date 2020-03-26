@@ -14,6 +14,10 @@ module.exports = function(app, swig, gestorBD) {
 
 
     app.get('/canciones/agregar', function (req, res) {
+        if ( req.session.usuario == null){
+            res.redirect("/tienda");
+            return;
+        }
         let respuesta = swig.renderFile('views/bagregar.html', {
 
 
@@ -40,10 +44,15 @@ module.exports = function(app, swig, gestorBD) {
 
 
     app.post("/cancion", function(req,res){
+        if ( req.session.usuario == null){
+            res.redirect("/tienda");
+            return;
+        }
         let cancion = {
             nombre : req.body.nombre,
             genero : req.body.genero,
-            precio : req.body.precio
+            precio : req.body.precio,
+            autor: req.session.usuario
         }
 
         // Conectarse
@@ -110,5 +119,29 @@ module.exports = function(app, swig, gestorBD) {
     app.get('/promo*',function(req,res){
         res.send('Respuesta patrón promo* ');
     });
+
+    app.post("/identificarse", function(req, res) {
+        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+            .update(req.body.password).digest('hex');
+        let criterio = {
+            email : req.body.email,
+            password : seguro
+        }
+        gestorBD.obtenerUsuarios(criterio, function(usuarios) {
+            if (usuarios == null || usuarios.length == 0) {
+                req.session.usuario = null;
+                res.send("No identificado: ");
+            } else {
+                req.session.usuario = usuarios[0].email;
+                res.send("identificado");
+            }
+        });
+    });
+
+    app.get('/desconectarse', function (req, res) {
+        req.session.usuario = null;
+        res.send("Usuario desconectado");
+    });
+
 
 };
