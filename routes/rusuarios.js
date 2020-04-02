@@ -29,4 +29,21 @@ module.exports = function(app, swig,gestorBD) {
         res.send(respuesta);
     });
 
+    app.post("/identificarse", function(req, res) {
+        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+            .update(req.body.password).digest('hex');
+        let criterio = {
+            email : req.body.email,
+            password : seguro
+        }
+        gestorBD.obtenerUsuarios(criterio, function(usuarios) {
+            if (usuarios == null || usuarios.length == 0) {
+                req.session.usuario = null;
+                res.send("No identificado: ");
+            } else {
+                req.session.usuario = usuarios[0].email;
+                res.redirect("/publicaciones");
+            }
+        });
+    });
 };
